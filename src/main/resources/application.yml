@@ -1,0 +1,10 @@
+spring:
+  jpa:
+    database: mysql
+    hibernate.ddl-auto: update
+    show-sql: true
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/branchify?serverTimezone=Asia/Seoul
+    username: root
+    password: yoonheuk7723
