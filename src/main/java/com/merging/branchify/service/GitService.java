@@ -26,7 +26,7 @@ public class GitService {
         this.commitRepository = commitRepository;
     }
     // 후에 수정해야하는 코드. 지금은 토큰처리가 어려워서 이렇게 함
-    //private String gitToken;
+    private String gitToken;
 
 //    public void setGitToken(String token) {
 //        this.gitToken = token;
