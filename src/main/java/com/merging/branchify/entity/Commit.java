@@ -18,7 +18,7 @@ public class Commit {
     private String sha; // GitHub에서 커밋을 식별하는 데 사용되는 고유 식별자가 SHA-1 해시 문자열이다.
 
     private String authorName;
-    private String authorEMail;
+    private String authorEmail;
     private String message;
     private String commitDate;
     private String repositoryName;
