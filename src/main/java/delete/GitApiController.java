@@ -1,11 +1,10 @@
-package controller;
+package delete;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import service.GitApiService;
 
 @RestController
 @RequestMapping("/api/github")
@@ -18,7 +17,7 @@ public class GitApiController {
         return gitApiService.getRepositoryInfo(owner, repo, token);
     }
 
-    @GetMapping("/repos/{owner}/{repo}/commits")
+    @GetMapping("/repos/{owner}/{repo}/commits/{commits_id}")
     public String getCommits(@PathVariable String owner, @PathVariable String repo, @PathVariable String token) {
         return gitApiService.getCommits(owner, repo, token);
     }

@@ -1,10 +1,31 @@
 spring:
   jpa:
-    database: mysql
-    hibernate.ddl-auto: update
-    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+#      dialect: org.hibernate.dialect.MySQL8Dialect #오류나서 추가
+#    show-sql: true
+  security:
+    user:
+      name: ieunji # 원하는 사용자 이름
+      password: dldmswl0711! # 원하는 비밀번호
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/branchify?serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3306/branchify?useSSL=false&serverTimezone=UTC
+    # url: jdbc:mysql://localhost:3306/branchify?serverTimezone=Asia/Seoul  # 시간대를 변경하고 싶을 때 사용
     username: root
-    password: yoonheuk7723
+    password: dldmswl0711!
+
+#spring:
+#  jpa:
+#    database: mysql
+#    hibernate.ddl-auto: update
+#    show-sql: true
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/branchify?useSSL=false&serverTimezone=UTC
+#    #url: jdbc:mysql://localhost:3306/branchify?serverTimezone=Asia/Seoul
+#    username: root
+#    password: dldmswl0711!
