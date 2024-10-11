@@ -17,7 +17,7 @@ import com.merging.branchify.user.User;
 
 
 @RestController
-@RequestMapping("/api.github.com")
+@RequestMapping("/api/github.com")
 public class GitController {
     @Autowired
     private GitService gitService;
@@ -25,7 +25,6 @@ public class GitController {
     public GitController(GitService gitService) {
         this.gitService = gitService;
     }
-
     /**
      * 특정 저장소의 전체 커밋 내역을 조회하는 메서드
      * @return ResponseDto에 커밋 내역을 담아 반환
@@ -45,5 +44,6 @@ public class GitController {
         // 조회된 커밋 내역 성공 응답으로 반환
         return ResponseEntity.ok(ResponseDto.success(commitResponse));
     }
+
 
 }

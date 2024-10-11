@@ -15,6 +15,7 @@ import com.merging.branchify.dto.CommitResponseDto;
 import com.merging.branchify.dto.CommitDto;
 import com.merging.branchify.entity.CommitEntity;
 import com.merging.branchify.repository.CommitRepository;
+import com.merging.branchify.entity.CommitEntity;
 
 @Service
 public class GitService {
@@ -24,12 +25,18 @@ public class GitService {
     public GitService(CommitRepository commitRepository) {
         this.commitRepository = commitRepository;
     }
+    // 후에 수정해야하는 코드. 지금은 토큰처리가 어려워서 이렇게 함
+    private String gitToken;
+
+//    public void setGitToken(String token) {
+//        this.gitToken = token;
+//    }
 
     public List<CommitResponseDto> getCommits(String owner, String repo) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
 
-        String gitToken = "-";
+        //토큰 받아오는 코드 작성필요
         headers.add("Authorization", "Bearer " + gitToken);
         headers.add("Accept", "application/vnd.github.v3+json");
 
@@ -40,8 +47,6 @@ public class GitService {
 
         // API 요청 보내기
         ResponseEntity<CommitDto[]> response = restTemplate.exchange(url, HttpMethod.GET, request, CommitDto[].class);
-        System.out.println("Response Status: " + response.getStatusCode());
-        System.out.println("Response Body: " + Arrays.toString(response.getBody()));
         // 응답 처리
         if (response.getStatusCode().is2xxSuccessful()) {
             CommitDto[] commits = response.getBody();
@@ -52,7 +57,7 @@ public class GitService {
                     System.out.println("Commit SHA: " + commit.getSha());
                     System.out.println("Commit Message: " + commit.getCommit().getMessage());
                     System.out.println("Commit Author: " + commit.getCommit().getAuthor());
-                    // 추가적으로 날짜 등 필요한 정보를 출력할 수 있습니다.
+//                    System.out.println("Commit Date: " + commit.getCommit().getAuthor().getDate());
                 }
             } else {
                 System.out.println("No commits found.");
@@ -78,8 +83,6 @@ public class GitService {
     // 커밋 데이터 가공
     private List<CommitResponseDto> processCommits(CommitDto[] commits) {
         List<CommitResponseDto> result = new ArrayList<>();
-        //확인
-//        if (commits == null) { return result; }
 
         for (CommitDto commit : commits) {
             CommitResponseDto dto = new CommitResponseDto();
