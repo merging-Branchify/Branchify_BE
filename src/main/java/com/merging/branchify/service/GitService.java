@@ -29,7 +29,7 @@ public class GitService {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
 
-        String gitToken = "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";
+        String gitToken = "-";
         headers.add("Authorization", "Bearer " + gitToken);
         headers.add("Accept", "application/vnd.github.v3+json");
 
@@ -74,30 +74,7 @@ public class GitService {
             return new ArrayList<>(); // 빈 리스트 반환
         }
     }
-//        HttpEntity<?> request = new HttpEntity<>(headers);
-//
-//        ResponseEntity<CommitDto[]> response = restTemplate.exchange(
-//                url,
-//                HttpMethod.GET,
-//                request,
-//                CommitDto[].class
-//        );
-//
-//        List<CommitResponseDto> commits = processCommits(response.getBody());
-//
-//            // 커밋 데이터를 데이터베이스에 저장
-//        for (CommitResponseDto commit : commits) {
-//            CommitEntity entity = new CommitEntity();
-//            entity.setSha(commit.getSha());
-//            entity.setMessage(commit.getMessage());
-//            entity.setAuthor(commit.getAuthor());
-//            entity.setDate(commit.getDate());
-//            // DB에 저장
-//            commitRepository.save(entity);
-//        }
 
-//        return commits;
-//    }
     // 커밋 데이터 가공
     private List<CommitResponseDto> processCommits(CommitDto[] commits) {
         List<CommitResponseDto> result = new ArrayList<>();
