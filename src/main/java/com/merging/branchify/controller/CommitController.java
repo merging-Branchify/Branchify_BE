@@ -16,7 +16,7 @@ public class CommitController {
     private final CommitService commitService;
 
     @GetMapping("/api/commits/{owner}/{repo}")
-    public List<Commit> getCommits(@PathVariable String owner,@PathVariable String repo) {
+    public List<Commit> getCommits(@PathVariable("owner") String owner,@PathVariable("repo") String repo) {
         return commitService.getCommitsFromApi(owner, repo);
     }
 }
