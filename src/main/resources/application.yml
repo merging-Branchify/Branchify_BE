@@ -7,9 +7,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://45.119.147.112:3306/merging?useSSL=false
+    url: jdbc:mysql://localhost:3306/branchify
     username: root
-    password: inha2400
+    password: yoonheuk7723
 
-github:
-  token: your_github_token
