@@ -3,9 +3,9 @@ package com.merging.branchify.service;
 import com.merging.branchify.dto.JiraIssueDTO;
 import com.merging.branchify.entity.JiraIssue;
 import com.merging.branchify.respository.JiraIssueRepository;
-import lombok.Value;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -39,10 +39,10 @@ public class JiraService {
         this.jiraIssueRepository = jiraIssueRepository;
     }
 
-    // Jira에서 하루 동안 변경된 이슈를 가져와 저장하는 메소드
+    // Jira에서 특정 기간 동안 변경된 이슈를 가져와 저장하는 메소드
     public void fetchAndStoreJiraUpdates() {
-        // Jira API URL에 하루 동안 변경된 이슈를 가져오는 JQL 쿼리 추가
-        String url = jiraBaseUrl + "/search?jql=updated >= -1d";
+        // Jira API URL에 3일 동안 변경된 이슈를 가져오는 JQL 쿼리 추가
+        String url = jiraBaseUrl + "/search?jql=updated >= -3d";
 
         // 인증 정보를 포함한 요청 헤더 생성
         HttpHeaders headers = createAuthHeaders();
