@@ -1,0 +1,15 @@
+spring:
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate.ddl-auto: update
+    show-sql: true
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://101.101.217.98:3306/merging?useSSL=false&serverTimezone=UTC
+    username: ieunji
+    password: dldmswl0711!
+
+github:
+  token: your_github_token
