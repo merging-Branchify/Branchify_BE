@@ -20,9 +20,15 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # 3. Gradle 빌드
+      # 3. Gradle 빌드 및 테스트 (테스트 환경에서 실행)
       - name: Build project
         run: ./gradlew build
+        env:
+          SPRING_PROFILES_ACTIVE: test # GitHub Actions에서 테스트 프로파일 활성화
+
+#      # 3. Gradle 빌드
+#      - name: Build project
+#        run: ./gradlew build
 
       # 4. 서버로 JAR 파일 전송 및 실행
       - name: Deploy JAR to Server
