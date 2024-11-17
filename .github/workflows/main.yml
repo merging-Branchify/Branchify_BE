@@ -43,7 +43,7 @@ jobs:
         REMOTE_DIR="/home/${USER}/app"
 
         # Copy build artifacts to the server
-        scp -i private_key -p 6789 build/libs/*.jar ${USER}@${HOST}:${REMOTE_DIR}
+        scp -i private_key -P 6789 build/libs/*.jar ${USER}@${HOST}:${REMOTE_DIR}
 
         # SSH into the server and restart the application
         ssh -i private_key -p 6789 ${USER}@${HOST} << EOF
