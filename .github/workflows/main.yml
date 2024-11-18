@@ -40,7 +40,7 @@ jobs:
         chmod 600 private_key
 
         # Define remote server path
-        REMOTE_DIR="/root/app"
+        REMOTE_DIR="/opt"
 
         # Copy build artifacts to the server
         scp -o StrictHostKeyChecking=no -i private_key -P 6789 build/libs/*.jar ${USER}@${HOST}:${REMOTE_DIR}
