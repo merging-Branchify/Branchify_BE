@@ -39,10 +39,6 @@ dependencies {
 	implementation 'org.json:json:20210307'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-	//테스트 코드에서만 사용
-	testImplementation 'com.h2database:h2'
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 tasks.named('test') {
