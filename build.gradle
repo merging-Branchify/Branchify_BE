@@ -28,7 +28,7 @@ dependencies {
 //	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	//developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 //	runtimeOnly 'mysql:mysql-connector-java:8.0.34'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -39,6 +39,14 @@ dependencies {
 	implementation 'org.json:json:20210307'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation ('com.slack.api:bolt-socket-mode:1.44.1')
+	implementation ('com.slack.api:bolt:1.44.1')
+	// Slack API 클라이언트와 모델 (이미 socket-mode에 포함되어 있지만 명시적으로 추가 가능)
+	implementation ('com.slack.api:slack-api-client:1.44.1')
+	//implementation 'com.slack.api:slack-api-model:1.44.1'
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.glassfish.tyrus.bundles:tyrus-standalone-client:2.1.2'
+	implementation 'jakarta.websocket:jakarta.websocket-api:2.0.0'
 }
 
 tasks.named('test') {
