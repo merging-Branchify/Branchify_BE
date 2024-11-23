@@ -9,10 +9,10 @@ import java.time.Instant;
 
 @Entity
 @Data
-@Table(name = "user_tokens")
+@Table(name = "notion_database")
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserTokenEntity {
+public class NotionDatabase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
