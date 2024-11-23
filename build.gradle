@@ -47,6 +47,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.glassfish.tyrus.bundles:tyrus-standalone-client:2.1.2'
 	implementation 'jakarta.websocket:jakarta.websocket-api:2.0.0'
+	implementation 'com.slack.api:slack-api-client:1.29.1'
 }
 
 tasks.named('test') {
