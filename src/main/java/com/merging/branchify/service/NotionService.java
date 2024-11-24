@@ -43,7 +43,7 @@ public class NotionService {
             // NotionDatabase 엔티티 생성 및 저장
             NotionDatabase notionDatabase = new NotionDatabase();
             notionDatabase.setUserId(userId);
-            notionDatabase.setDatabaseId(databaseId);
+            notionDatabase.setSelectedDatabaseId(databaseId);
 
             notionDataRepository.save(notionDatabase);
 

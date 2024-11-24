@@ -1,9 +1,7 @@
 package com.merging.branchify.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.Instant;
 
@@ -17,6 +15,9 @@ public class NotionDatabase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "user_id", nullable = false)
+    private String userId; // 사용자 ID
 
     @Column(nullable = false)
     private String selectedDatabaseId; // 선택된 데이터베이스 ID
