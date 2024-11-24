@@ -1,26 +1,26 @@
 package com.merging.branchify.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
-@Table(name = "notion_databases")
-@Getter
-@Setter
+@Data
+@Table(name = "notion_database")
+@AllArgsConstructor
+@NoArgsConstructor
 public class NotionDatabase {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private String userId;
+    @Column(nullable = false)
+    private String selectedDatabaseId; // 선택된 데이터베이스 ID
 
-    @Column(name = "database_id", nullable = false)
-    private String databaseId;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(nullable = false)
+    private Instant lastChecked; // 마지막으로 확인한 시간
 }
