@@ -7,7 +7,7 @@
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": "알림 받을 데이터베이스를 선택하세요"
+        "text": "🔗연동할 Notion 데이터베이스를 선택하세요."
       },
       "accessory": {
         "type": "static_select",

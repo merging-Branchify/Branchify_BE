@@ -1,57 +1,49 @@
 {
-  "blocks" : [ {
-    "type" : "divider"
-  }, {
-    "type" : "section",
-    "text" : {
-      "type" : "mrkdwn",
-      "text" : "Pick an item from the dropdown list"
+  "blocks": [
+    {
+      "type": "divider"
     },
-    "accessory" : {
-      "type" : "static_select",
-      "placeholder" : {
-        "type" : "plain_text",
-        "text" : "Select an item",
-        "emoji" : true
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "🔗연동할 Jira 프로젝트를 선택하세요."
       },
-      "options" : [ {
-        "text" : {
-          "type" : "plain_text",
-          "text" : "10011"
+      "accessory": {
+        "type": "static_select",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Select an item",
+          "emoji": true
         },
-        "value" : "10011"
-      }, {
-        "text" : {
-          "type" : "plain_text",
-          "text" : "10015"
-        },
-        "value" : "10015"
-      }, {
-        "text" : {
-          "type" : "plain_text",
-          "text" : "10014"
-        },
-        "value" : "10014"
-      }, {
-        "text" : {
-          "type" : "plain_text",
-          "text" : "10013"
-        },
-        "value" : "10013"
-      }, {
-        "text" : {
-          "type" : "plain_text",
-          "text" : "10012"
-        },
-        "value" : "10012"
-      }, {
-        "text" : {
-          "type" : "plain_text",
-          "text" : "10016"
-        },
-        "value" : "10016"
-      } ],
-      "action_id" : "static_select-action"
+        "options": [
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "*plain_text option 0*",
+              "emoji": true
+            },
+            "value": "value-0"
+          },
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "*plain_text option 1*",
+              "emoji": true
+            },
+            "value": "value-1"
+          },
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "*plain_text option 2*",
+              "emoji": true
+            },
+            "value": "value-2"
+          }
+        ],
+        "action_id": "static_select-action"
+      }
     }
-  } ]
+  ]
 }
