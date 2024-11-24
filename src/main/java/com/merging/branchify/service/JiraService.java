@@ -2,7 +2,9 @@ package com.merging.branchify.service;
 
 import com.merging.branchify.dto.JiraIssueDTO;
 import com.merging.branchify.entity.JiraIssue;
+import com.merging.branchify.entity.JiraProject;
 import com.merging.branchify.respository.JiraIssueRepository;
+import com.merging.branchify.respository.JiraProjectRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
+import java.util.List;
 
 @Service
 public class JiraService {
@@ -33,10 +36,12 @@ public class JiraService {
 
     private final JiraIssueRepository jiraIssueRepository;
     private final RestTemplate restTemplate = new RestTemplate(); // REST API 요청을 위한 객체 생성
+    private final JiraProjectRepository jiraProjectRepository;
 
     // Repository를 생성자 주입
-    public JiraService(JiraIssueRepository jiraIssueRepository) {
+    public JiraService(JiraIssueRepository jiraIssueRepository, JiraProjectRepository jiraProjectRepository) {
         this.jiraIssueRepository = jiraIssueRepository;
+        this.jiraProjectRepository = jiraProjectRepository;
     }
 
     // Jira에서 특정 기간 동안 변경된 이슈를 가져와 저장하는 메소드
@@ -57,6 +62,37 @@ public class JiraService {
             System.out.println("API 요청 실패 - 상태 코드: " + response.getStatusCode());
         }
     }
+
+    //ieunji 추가
+    // Jira에서 최신 이슈 데이터를 반환 (DTO 형식)
+    public List<JiraIssueDTO> fetchAndReturnIssuesIds() {
+        fetchAndStoreJiraUpdates(); // 최신 데이터를 저장
+        return jiraIssueRepository.findAll().stream()
+                .map(this::convertToDTO) // 엔티티를 DTO로 변환
+                .toList();
+    }
+
+    // 엔티티를 DTO로 변환하는 메서드
+    private JiraIssueDTO convertToDTO(JiraIssue issue) {
+        JiraIssueDTO dto = new JiraIssueDTO();
+        dto.setIssueId(issue.getIssueId());
+        dto.setSummary(issue.getSummary());
+        dto.setStatus(issue.getStatus());
+        dto.setAssignee(issue.getAssignee());
+        dto.setUpdatedAt(issue.getUpdatedAt());
+        dto.setProjectKey(issue.getProjectKey());
+        return dto;
+    }
+    public void saveProjectSelection(String userId, String selectedProjectId) {
+        // JiraProject 엔티티 생성 및 저장
+        JiraProject jiraProject = new JiraProject();
+        jiraProject.setUserId(userId);
+        jiraProject.setProjectId(selectedProjectId);
+
+        jiraProjectRepository.save(jiraProject); // 데이터베이스에 저장
+        System.out.println("User " + userId + " selected Jira project: " + selectedProjectId);
+    }
+    //--여기까지
 
     // 인증 헤더 생성 메소드
     private HttpHeaders createAuthHeaders() {

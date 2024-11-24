@@ -15,6 +15,8 @@ public class JiraIssue {
 
     @Column(unique = true)
     private String issueId;
+    private Long userId;
+    private String projectId;
 
     private String summary;
     private String status;
