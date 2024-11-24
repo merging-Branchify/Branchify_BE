@@ -1,17 +1,11 @@
 {
-  "type": "modal",
-  "callback_id": "channel_select_modal",
-  "title": {
-    "type": "plain_text",
-    "text": "Channel Selection"
-  },
   "blocks": [
     {
       "type": "section",
       "block_id": "channel_selection",
       "text": {
         "type": "mrkdwn",
-        "text": "Please select a channel to receive notifications:"
+        "text": "🔔파이 봇 알림을 받을 Slack 채널을 선택하세요."
       },
       "accessory": {
         "type": "conversations_select",
