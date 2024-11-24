@@ -30,7 +30,14 @@ public class SlackService {
         // JSON 파일 읽기
         JsonNode rootNode = mapper.readTree(new File(JSON_FILE_PATH));
         JsonNode blocks = rootNode.get("blocks");
-        JsonNode accessory = blocks.get(0).get("accessory");
+
+        JsonNode accessory= null;
+        for (JsonNode block : blocks) {
+            if (block.has("accessory")) {
+                accessory = block.get("accessory");
+                break;
+            }
+        }
 
         // 기존 옵션 대체
         List<JsonNode> options = databases.stream().map(database -> {
@@ -62,6 +69,7 @@ public class SlackService {
         ChatPostMessageResponse response = client.chatPostMessage(req -> req
                 .channel(channelId)
                 .blocksAsString(blocksJson) // JSON 블록 전송
+                .text("알림을 받을 데이터베이스를 선택하세요.") // 텍스트 필드 추가
         );
 
         if (!response.isOk()) {
@@ -76,6 +84,27 @@ public class SlackService {
 
         // Slack 메시지 전송
         sendBlockMessage(channelId, botToken);
+    }
+
+    //알림 채널 선택
+    public void sendChannelSelectionMessage(String channelId, String botToken) throws IOException, SlackApiException {
+        // Step 1: JSON 파일 읽기
+        JsonNode rootNode = mapper.readTree(new File("src/main/resources/channel_select.json"));
+        String blocksJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode.get("blocks"));
+
+        // Step 2: Slack 메시지 전송
+        Slack slack = Slack.getInstance();
+        var client = slack.methods(botToken);
+
+        ChatPostMessageResponse response = client.chatPostMessage(req -> req
+                .channel(channelId)
+                .blocksAsString(blocksJson)
+                .text("Now, select a channel to receive notifications.")
+        );
+
+        if (!response.isOk()) {
+            System.err.println("Slack API Error: " + response.getError());
+        }
     }
 }
 

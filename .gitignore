@@ -19,7 +19,7 @@ bin/
 
 ### IntelliJ IDEA ###
 .idea
-application.yml
+src/main/java/com/merging/branchify/application.yml
 *.iws
 *.iml
 *.ipr

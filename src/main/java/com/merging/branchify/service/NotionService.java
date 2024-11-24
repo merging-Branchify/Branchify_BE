@@ -3,6 +3,8 @@ package com.merging.branchify.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.merging.branchify.dto.NotionDatabaseDTO;
+import com.merging.branchify.entity.NotionDatabase;
+import com.merging.branchify.respository.NotionDataRepository;
 import com.merging.branchify.respository.UserTokenRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -24,11 +26,38 @@ public class NotionService {
     private String notionVersion;
 
     private final UserTokenRepository userTokenRepository;
+    private final NotionDataRepository notionDataRepository;
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public NotionService(UserTokenRepository userTokenRepository) {
+    public NotionService(UserTokenRepository userTokenRepository, NotionDataRepository notionDataRepository) {
         this.userTokenRepository = userTokenRepository;
+        this.notionDataRepository = notionDataRepository;
+    }
+
+    // 데이터베이스 선택 저장
+    public Map<String, Object> saveDatabaseSelection(String userId, String databaseId) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // NotionDatabase 엔티티 생성 및 저장
+            NotionDatabase notionDatabase = new NotionDatabase();
+            notionDatabase.setUserId(userId);
+            notionDatabase.setDatabaseId(databaseId);
+
+            notionDataRepository.save(notionDatabase);
+
+            // 응답 데이터 구성
+            response.put("status", "success");
+            response.put("message", "Database selection saved successfully.");
+            System.out.println("User " + userId + " selected database: " + databaseId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("status", "failure");
+            response.put("error", e.getMessage());
+        }
+
+        return response;
     }
 
     // 데이터베이스 목록 조회

@@ -1,0 +1,26 @@
+{
+  "type": "modal",
+  "callback_id": "channel_select_modal",
+  "title": {
+    "type": "plain_text",
+    "text": "Channel Selection"
+  },
+  "blocks": [
+    {
+      "type": "section",
+      "block_id": "channel_selection",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Please select a channel to receive notifications:"
+      },
+      "accessory": {
+        "type": "conversations_select",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Select a channel"
+        },
+        "action_id": "selected_channel"
+      }
+    }
+  ]
+}
