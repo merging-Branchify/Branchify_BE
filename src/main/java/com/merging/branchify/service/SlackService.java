@@ -1,217 +1,212 @@
 package com.merging.branchify.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.merging.branchify.dto.JiraProjectDTO;
 import com.merging.branchify.dto.NotionDatabaseDTO;
+import com.merging.branchify.entity.ChannelSelection;
+import com.merging.branchify.respository.ChannelRepository;
 import com.slack.api.Slack;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
+import com.slack.api.methods.response.views.ViewsPublishResponse;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Block;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Scanner;
 
 @Service
 public class SlackService {
-    private final NotionService notionService;
-    private final JiraService jiraService;
+    private final ChannelRepository channelRepository;
     private final ObjectMapper mapper = new ObjectMapper();
-    private final RestTemplate restTemplate = new RestTemplate();
 
-    /**
-     * 온보딩 페이지
-     */
-    public boolean hasSeenOnboarding(String userId) {
-        // TODO: DB 또는 캐시로 사용자 상태 확인 로직 구현
-        return false; // 예시로 항상 false 반환
+    @Value("${slack.bot.token}")
+    private String botToken;
+
+    public SlackService(ChannelRepository channelRepository) {
+        this.channelRepository = channelRepository;
     }
 
-    // 온보딩 상태 저장
-    public void setOnboarded(String userId) {
-        // TODO: 사용자 온보딩 상태 저장 로직 구현
-    }
+    public void handleAppHomeOpened(String userId) {
+        // 온보딩 JSON 로드
+        String onboardingBlocks = loadOnboardingBlocks();
 
-    // JSON 파일 로드
-    public String loadOnboardingJson() {
+        // 홈 탭 업데이트 API 호출
+        Slack slack = Slack.getInstance();
         try {
-            return new String(Files.readAllBytes(Paths.get("src/main/resources/onboarding.json")));
-        } catch (Exception e) {
-            throw new RuntimeException("온보딩 JSON 파일 로드 실패", e);
-        }
-    }
-
-    // 홈 탭 업데이트
-    public void publishHomeTab(String userId, String viewJson) {
-        String slackApiUrl = "https://slack.com/api/views.publish";
-
-        // 요청 본문 생성
-        Map<String, Object> requestBody = Map.of(
-                "user_id", userId,
-                "view", Map.of("type", "home", "blocks", viewJson)
-        );
-
-        // HTTP 요청
-        restTemplate.postForEntity(
-                slackApiUrl,
-                new org.springframework.http.HttpEntity<>(requestBody, createHeaders()),
-                String.class
-        );
-    }
-
-    // HTTP 헤더 생성
-    private org.springframework.http.HttpHeaders createHeaders() {
-        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-        headers.set("Authorization", "Bearer YOUR_SLACK_BOT_TOKEN");
-        headers.set("Content-Type", "application/json");
-        return headers;
-    }
-
-    /**
-     * JSON 파일 경로
-     **/
-    private static final String NOTION_JSON_PATH = "src/main/resources/database_select.json";
-    private static final String JIRA_JSON_PATH = "src/main/resources/project_select.json";
-
-    public SlackService(NotionService notionService, JiraService jiraService) {
-        this.notionService = notionService;
-        this.jiraService = jiraService;
-    }
-
-    /**
-     * 공통 JSON 업데이트 메서드
-     * - Notion, Jira 데이터를 처리하여 JSON 파일 업데이트
-     */
-    private <T> void updateJson(List<T> data, String jsonPath,
-                                java.util.function.Function<T, String> getTitle,
-                                java.util.function.Function<T, String> getValue) throws IOException {
-
-        // JSON 파일 읽기
-        JsonNode rootNode = mapper.readTree(new File(jsonPath));
-        JsonNode blocks = rootNode.get("blocks");
-
-        JsonNode accessory = null;
-        for (JsonNode block : blocks) {
-            if (block.has("accessory")) {
-                accessory = block.get("accessory");
-                break;
+            // views.publish 호출
+            ViewsPublishResponse response = slack.methods(botToken).viewsPublish(r -> r
+                    .userId(userId)
+                    .viewAsString(onboardingBlocks)  // viewAsString으로 JSON 문자열 전달
+            );
+            if (response.isOk()) {
+                System.out.println("App Home updated successfully!");
+            } else {
+                System.err.println("Error updating App Home: " + response.getError());
+                // 오류에 대한 자세한 응답 내용 -> 추후 삭제
+                System.err.println("Error details: " + response.getResponseMetadata());
             }
+     } catch (IOException | SlackApiException e) {
+            System.err.println("Error updating App Home: " + e.getMessage());
+            e.printStackTrace();
+     }
+    }
+
+
+    private String loadOnboardingBlocks() {
+        // onboarding.json 파일을 리소스에서 읽기
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("onboarding.json")) {
+            if (inputStream == null) {
+                System.err.println("onboarding.json file not found in resources.");
+                return "{}"; // 기본값
+            }
+            // 파일을 String으로 변환하여 반환
+            try (Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
+                return scanner.useDelimiter("\\A").next();  // 파일 전체를 한 번에 읽기
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "{}"; // 기본값
+        }
+    }
+
+    public void sendNotionDatabaseBlock(String channelId, List<NotionDatabaseDTO> databases) throws IOException, SlackApiException {
+        // 옵션 리스트 생성
+        ArrayNode options = mapper.createArrayNode();
+        for (NotionDatabaseDTO db : databases) {
+            options.add(createOption(db.getTitle(), db.getId()));
         }
 
-        // 옵션 생성
-        List<JsonNode> options = data.stream().map(item -> {
-            JsonNode option = mapper.createObjectNode();
-            ((ObjectNode) option).putObject("text")
-                    .put("type", "plain_text")
-                    .put("text", getTitle.apply(item));
-            ((ObjectNode) option).put("value", getValue.apply(item));
-            return option;
-        }).toList();
+        // 블록 생성
+        String blocksJson = createStaticSelectBlock("🔗연동할 Notion 프로젝트를 선택하세요.", options, "dynamic_select_action");
 
-        if (accessory != null) {
-            ((ObjectNode) accessory).set("options", mapper.createArrayNode().addAll(options));
+        // Slack 메시지 전송
+        sendMessage(channelId, blocksJson, "Notion database selection");
+    }
+
+    public void sendJiraProjectBlock(String channelId, List<JiraProjectDTO> projects) throws IOException, SlackApiException {
+        // 옵션 리스트 생성
+        ArrayNode options = mapper.createArrayNode();
+        for (JiraProjectDTO proj : projects) {
+            options.add(createOption(proj.getProjectName(), proj.getProjectId()));
         }
 
-        // JSON 파일 저장
-        mapper.writerWithDefaultPrettyPrinter().writeValue(new File(jsonPath), rootNode);
-        System.out.println("Updated JSON at " + jsonPath + ": " + rootNode);
+        // 블록 생성
+        String blocksJson = createStaticSelectBlock("🔗연동할 Jira 프로젝트를 선택하세요.", options, "dynamic_select_action");
+
+        // Slack 메시지 전송
+        sendMessage(channelId, blocksJson, "Jira project selection");
     }
 
-    /**
-     * Notion 데이터 JSON 업데이트
-     */
-    public void updateJsonWithDatabases() throws IOException {
-        List<NotionDatabaseDTO> databases = notionService.listDatabases();
-        updateJson(
-                databases,
-                NOTION_JSON_PATH,
-                NotionDatabaseDTO::getTitle,  // 제목: Notion 데이터베이스의 제목
-                NotionDatabaseDTO::getId     // 값: Notion 데이터베이스 ID
-        );
+    public void sendChannelSelectBlock(String channelId) throws IOException, SlackApiException {
+        // Conversations Select 블록 생성
+        String blocksJson = createChannelSelectBlock("🔔 Select a Slack channel for notifications:", "channel_select_action");
+
+        // Slack 메시지 전송
+        sendMessage(channelId, blocksJson, "Channel selection prompt");
     }
 
-    /**
-     * Jira 데이터 JSON 업데이트
-     */
-    public void updateJsonWithJiraProject() throws IOException {
-        List<JiraProjectDTO> projects = jiraService.fetchProjectList();
-        updateJson(
-                projects,
-                JIRA_JSON_PATH,
-                JiraProjectDTO::getProjectName,  // 사용자에게 보이는 이름
-                JiraProjectDTO::getProjectId    // 서버에서 처리할 값
-        );
+    private String createChannelSelectBlock(String label, String actionId) {
+        ObjectNode block = mapper.createObjectNode();
+        block.put("type", "section");
+
+        // 텍스트 노드
+        ObjectNode textNode = mapper.createObjectNode();
+        textNode.put("type", "mrkdwn");
+        textNode.put("text", label);
+        block.set("text", textNode);
+
+        // Conversations Select 액세서리
+        ObjectNode accessory = mapper.createObjectNode();
+        accessory.put("type", "conversations_select");
+
+        ObjectNode placeholder = mapper.createObjectNode();
+        placeholder.put("type", "plain_text");
+        placeholder.put("text", "Select a channel");
+        placeholder.put("emoji", true);
+
+        accessory.set("placeholder", placeholder);
+        accessory.put("action_id", actionId);
+
+        block.set("accessory", accessory);
+
+        // 블록 배열 생성
+        ArrayNode blocks = mapper.createArrayNode();
+        blocks.add(block);
+
+        // JSON 문자열 반환
+        return blocks.toString();
     }
 
-    /**
-     * Slack 메시지 전송
-     */
-    public void sendBlockMessage(String channelId, String botToken, String jsonPath, String message) throws IOException, SlackApiException {
-        // JSON 파일 읽기
-        JsonNode rootNode = mapper.readTree(new File(jsonPath));
-        String blocksJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode.get("blocks"));
+    private ObjectNode createOption(String text, String value) {
+        ObjectNode option = mapper.createObjectNode();
+        ObjectNode textNode = mapper.createObjectNode();
+        textNode.put("type", "plain_text");
+        textNode.put("text", text);
+        textNode.put("emoji", true);
 
-        // Slack API 호출
+        option.set("text", textNode);
+        option.put("value", value);
+
+        return option;
+    }
+
+    private String createStaticSelectBlock(String label, ArrayNode options, String actionId) throws IOException {
+        ObjectNode block = mapper.createObjectNode();
+        block.put("type", "section");
+
+        ObjectNode textNode = mapper.createObjectNode();
+        textNode.put("type", "mrkdwn");
+        textNode.put("text", label);
+        block.set("text", textNode);
+
+        ObjectNode accessory = mapper.createObjectNode();
+        accessory.put("type", "static_select");
+
+        ObjectNode placeholder = mapper.createObjectNode();
+        placeholder.put("type", "plain_text");
+        placeholder.put("text", "Select an option");
+        placeholder.put("emoji", true);
+
+        accessory.set("placeholder", placeholder);
+        accessory.set("options", options);
+        accessory.put("action_id", actionId);
+
+        block.set("accessory", accessory);
+
+        ArrayNode blocks = mapper.createArrayNode();
+        blocks.add(block);
+
+        return blocks.toString();
+    }
+
+    private void sendMessage(String channelId, String blocksJson, String text) throws IOException, SlackApiException {
         Slack slack = Slack.getInstance();
-        var client = slack.methods(botToken);
-
-        ChatPostMessageResponse response = client.chatPostMessage(req -> req
+        ChatPostMessageResponse response = slack.methods(botToken).chatPostMessage(req -> req
                 .channel(channelId)
                 .blocksAsString(blocksJson)
-                .text(message)
-        );
+                .text(text));
 
         if (!response.isOk()) {
+            // 에러 로깅
             System.err.println("Slack API Error: " + response.getError());
-        } else {
-            System.out.println("Slack Message Sent Successfully!");
+            if (response.getResponseMetadata() != null) {
+                System.err.println("Response Metadata: " + response.getResponseMetadata().toString());
+            }
+            // 사용자 정의 예외 처리 (필요한 경우)
+            throw new RuntimeException("Failed to send message to Slack: " + response.getError());
         }
     }
 
-    /**
-     * Notion 데이터 업데이트 + 메시지 전송
-     */
-    public void updateAndSendNotionMessage(String channelId, String botToken) throws IOException, SlackApiException {
-        updateJsonWithDatabases();
-        sendBlockMessage(channelId, botToken, NOTION_JSON_PATH, "알림을 받을 데이터베이스를 선택하세요.");
-    }
-
-    /**
-     * Jira 데이터 업데이트 + 메시지 전송
-     */
-    public void updateAndSendJiraMessage(String channelId, String botToken) throws IOException, SlackApiException {
-        updateJsonWithJiraProject();
-        sendBlockMessage(channelId, botToken, JIRA_JSON_PATH, "알림을 받을 Jira 이슈를 선택하세요.");
-    }
-
-    /**
-     * 채널 선택 전송 메서드
-     */
-    public void sendChannelSelectMessage(String channelId, String botToken) throws IOException, SlackApiException {
-        // JSON 파일 읽기
-        JsonNode rootNode = mapper.readTree(new File("src/main/resources/channel_select.json"));
-        String blocksJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode.get("blocks"));
-
-        // Slack API 호출
-        Slack slack = Slack.getInstance();
-        var client = slack.methods(botToken);
-
-        ChatPostMessageResponse response = client.chatPostMessage(req -> req
-                .channel(channelId)
-                .blocksAsString(blocksJson)
-                .text("알림을 받을 Slack 채널을 선택하세요.")
-        );
-
-        if (!response.isOk()) {
-            System.err.println("Slack API Error: " + response.getError());
-        } else {
-            System.out.println("Slack Channel Selection Message Sent Successfully!");
-        }
+    public void saveSelectedChannel(String userId, String channelId) {
+        ChannelSelection channelSelection = new ChannelSelection(userId, channelId);
+        channelRepository.save(channelSelection);
     }
 }

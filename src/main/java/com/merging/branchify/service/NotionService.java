@@ -11,6 +11,9 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +47,8 @@ public class NotionService {
             NotionDatabase notionDatabase = new NotionDatabase();
             notionDatabase.setUserId(userId);
             notionDatabase.setSelectedDatabaseId(databaseId);
-
+            Instant now = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant();
+            notionDatabase.setLastChecked(now);;
             notionDataRepository.save(notionDatabase);
 
             // 응답 데이터 구성

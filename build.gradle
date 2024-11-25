@@ -70,6 +70,7 @@ dependencies {
 		// Slack Bolt & Socket Mode
 		implementation 'com.slack.api:bolt:1.44.2'
 		implementation 'com.slack.api:bolt-socket-mode:1.44.2'
+		implementation 'com.slack.api:slack-api-client:1.44.2'
 
 		// WebSocket API & 구현체
 		implementation 'javax.websocket:javax.websocket-api:1.1' // Java EE 7 WebSocket API

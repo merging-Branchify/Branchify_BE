@@ -1,101 +1,62 @@
 package com.merging.branchify.config;
 
-import com.merging.branchify.controller.SlackEventController;
-import com.slack.api.SlackConfig;
 import com.slack.api.bolt.App;
+import com.slack.api.bolt.socket_mode.SocketModeApp;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
+import com.merging.branchify.service.SlackService;
+import com.merging.branchify.controller.SlackEventController;
 
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.slack.api.bolt.socket_mode.SocketModeApp;
-import org.springframework.http.*;
-import org.springframework.web.client.RestTemplate;
-
-@Import(SlackConfig.class)
-@Component // Spring Boot에서 이 클래스를 Bean으로 등록
+@Component
 public class SlackAppRunner implements CommandLineRunner {
 
-    private final SlackEventController slackEventController;
     private final String appToken;
+    private final SlackService slackService;
+    private final SlackEventController slackEventController;
 
-    public SlackAppRunner(SlackEventController slackEventController,
-                          @Value("${slack.app.token}") String appToken) {
-        this.slackEventController = slackEventController;
+    public SlackAppRunner(@Value("${slack.app.token}") String appToken, SlackService slackService, SlackEventController slackEventController) {
         this.appToken = appToken;
-
+        this.slackService = slackService;
+        this.slackEventController = slackEventController;
     }
-
     @Override
-    public void run(String... args) throws Exception {
-
-        // Slack Bolt App 설정 및 실행
-        App app = new App();
-        slackEventController.configureSlackCommands(app); // 명령어 및 핸들러 등록
-        //app_home_opened 이벤트 처리
-        app.event(AppHomeOpenedEvent.class, (req, ctx) -> {
-            slackEventController.handleAppHomeOpenedEvent(req.getEvent(), ctx);
-            return ctx.ack();
-        });
-        //WebSocket URL 가져오기
-        String webSocketUrl = getWebSocketUrl();
-
-        // WebSocket 연결 시작
-        startWebSocketConnection(webSocketUrl, app);
-
-    }
-    /**
-     * Slack API 호출을 통해 WebSocket URL 가져오기
-     */
-    private String getWebSocketUrl() {
-        RestTemplate restTemplate = new RestTemplate();
-
-        // API 호출 헤더 설정
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.setBearerAuth(appToken);
-
-        HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
-
-        // Slack API 요청 보내기
-        ResponseEntity<String> response = restTemplate.exchange(
-                "https://slack.com/api/apps.connections.open",
-                HttpMethod.POST,
-                requestEntity,
-                String.class
-        );
-
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode rootNode = objectMapper.readTree(response.getBody());
-                if (rootNode.get("ok").asBoolean()) {
-                    return rootNode.get("url").asText();
-                } else {
-                    throw new RuntimeException("Slack API error: " + rootNode.get("error").asText());
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to parse WebSocket URL from Slack response", e);
-            }
-        } else {
-            throw new RuntimeException("Failed to retrieve WebSocket URL from Slack.");
-        }
-    }
-
-    /**
-     * WebSocket 연결 시작
-     */
-    private void startWebSocketConnection(String webSocketUrl, App app) {
+    public void run(String... args) {
         try {
+            System.out.println("Initializing Slack Bolt App...");
+
+            // Slack Bolt 앱 초기화
+            App app = new App();
+
+            app.use((req, res, chain) -> {
+                System.out.println("Received request: " + req.getRequestBodyAsString());
+                return chain.next(req);
+            });
+
+            // App Home Opened 이벤트 핸들러 등록
+            app.event(AppHomeOpenedEvent.class, (payload, ctx) -> {
+                //System.out.println("App Home Opened Event Triggered by User: " + payload.getEvent().getUser());
+                String userId = payload.getEvent().getUser();
+                System.out.println("App Home Opened Event Triggered by User: " + userId);
+
+                slackService.handleAppHomeOpened(userId);
+                return ctx.ack();
+            });
+
+            slackEventController.configureSlackCommands(app); // 핸들러 등록
+
+            // WebSocket 연결 시작
+            System.out.println("Starting WebSocket connection...");
             SocketModeApp socketModeApp = new SocketModeApp(appToken, app);
-            socketModeApp.start(); // WebSocket 연결 시작
-            System.out.println("WebSocket connection established with URL: " + webSocketUrl);
+            socketModeApp.start();
+            System.out.println("WebSocket connection established.");
+
         } catch (Exception e) {
-            throw new RuntimeException("Failed to start WebSocket connection", e);
+            System.err.println("Error during Slack WebSocket initialization: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
 }
+

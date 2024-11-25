@@ -13,7 +13,7 @@
           "type": "plain_text",
           "text": "Select a channel"
         },
-        "action_id": "selected_channel"
+        "action_id": "channel_select_action"
       }
     }
   ]
