@@ -1,11 +1,16 @@
 package com.merging.branchify.controller;
-import com.google.gson.JsonObject;
 import com.merging.branchify.service.NotionService;
 import com.merging.branchify.service.JiraService;
 import com.merging.branchify.service.SlackService;
 import com.slack.api.bolt.App;
+import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import com.slack.api.bolt.context.builtin.EventContext;
+import com.slack.api.model.event.AppHomeOpenedEvent;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static com.slack.api.model.block.Blocks.asBlocks;
 
 
 @Component
@@ -19,6 +24,17 @@ public class SlackEventController {
         this.slackService = slackService;
         this.notionService = notionService;
         this.jiraService = jiraService;
+    }
+    public void handleAppHomeOpenedEvent(AppHomeOpenedEvent event, EventContext ctx) {
+        String userId = event.getUser();
+
+        // 온보딩 여부 확인 및 처리
+        if (!slackService.hasSeenOnboarding(userId)) {
+            String onboardingJson = slackService.loadOnboardingJson();
+            slackService.publishHomeTab(userId, onboardingJson);
+            slackService.setOnboarded(userId);
+        }
+        ctx.ack(); // 이벤트 처리 완료 응답
     }
 
     @Value("${slack.bot.token}")
@@ -39,11 +55,14 @@ public class SlackEventController {
         });
 
         // Notion 데이터베이스 선택 핸들러
-        app.blockAction("notion_database_select", (req, ctx) -> {
+        app.blockAction("database_select-action", (req, ctx) -> {
             String userId = req.getPayload().getUser().getId();;
             String selectedDatabaseId = req.getPayload().getActions().get(0).getSelectedOption().getValue();
-            // 선택한 데이터베이스를 저장 (데이터베이스 로직 필요)
+            // 선택한 데이터베이스를 저장
             notionService.saveDatabaseSelection(userId, selectedDatabaseId);
+            // 알림 채널 선택 메시지 표시
+            String channelId = req.getPayload().getChannel().getId();
+            slackService.sendChannelSelectMessage(channelId, botToken);
 
             ctx.respond("You selected database: " + selectedDatabaseId);
             return ctx.ack();
@@ -62,44 +81,30 @@ public class SlackEventController {
         });
 
         // Jira 프로젝트 선택 핸들러
-        app.blockAction("jira_project_select", (req, ctx) -> {
+        app.blockAction("project_select-action", (req, ctx) -> {
             String userId = req.getPayload().getUser().getId();
             String selectedProjectId = req.getPayload().getActions().get(0).getSelectedOption().getValue();
 
             // Jira 프로젝트 저장
             jiraService.saveProjectSelection(userId, selectedProjectId);
+            // 알림 채널 선택 메시지 표시
+            String channelId = req.getPayload().getChannel().getId();
+            slackService.sendChannelSelectMessage(channelId, botToken);
+
             ctx.respond("You selected Jira project: " + selectedProjectId);
             return ctx.ack();
         });
         // 알림 채널 선택 핸들러
-        app.blockAction("selected_channel", (req, ctx) -> {
-            try {
-                String userId = req.getPayload().getUser().getId();
-                String selectedChannelId = req.getPayload().getActions().get(0).getSelectedConversation();
+        app.blockAction("channel_select", (req, ctx) -> {
+            String userId = req.getPayload().getUser().getId();
+            String selectedChannelId = req.getPayload().getActions().get(0).getSelectedConversation();
 
-                // 선택한 채널을 저장-> 이 기능 필요한가?
-                ctx.respond("You selected channel: <#" + selectedChannelId + ">");
-                return ctx.ack();
-            } catch (Exception e) {
-                JsonObject errorResponse = new JsonObject();
-                errorResponse.addProperty("response_type", "ephemeral");
-                errorResponse.addProperty("text", "Failed to process channel selection.");
-
-                return ctx.ack(errorResponse);
-            }
+            // 선택한 채널을 저장-> 이 기능 필요한가?
+            ctx.respond("You selected channel: <#" + selectedChannelId + ">");
+            return ctx.ack();
         });
     }
 
 
 }
 
-
-
-
-// /jira_connect 명령어 핸들러
-//        app.command("/jira_connect", (req, ctx) -> {
-//            List<Option> options = slackService.getJiraProjectOptions(); // 지라 프로젝트 데이터를 가져옵니다.
-//            List<LayoutBlock> blocks = slackService.createJiraProjectBlock(options); // 지라 프로젝트 블록 생성.
-//            ctx.respond(res -> res.blocks(blocks));
-//            return ctx.ack();
-//        });

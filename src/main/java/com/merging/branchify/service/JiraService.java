@@ -1,9 +1,12 @@
 package com.merging.branchify.service;
 
 import com.merging.branchify.dto.JiraIssueDTO;
+import com.merging.branchify.dto.JiraProjectDTO;
 import com.merging.branchify.entity.JiraIssue;
+//import com.merging.branchify.entity.JiraProject;
 import com.merging.branchify.entity.JiraProject;
 import com.merging.branchify.respository.JiraIssueRepository;
+//import com.merging.branchify.respository.JiraProjectRepository;
 import com.merging.branchify.respository.JiraProjectRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class JiraService {
@@ -35,8 +39,8 @@ public class JiraService {
     private String jiraToken;
 
     private final JiraIssueRepository jiraIssueRepository;
-    private final RestTemplate restTemplate = new RestTemplate(); // REST API 요청을 위한 객체 생성
     private final JiraProjectRepository jiraProjectRepository;
+    private final RestTemplate restTemplate = new RestTemplate(); // REST API 요청을 위한 객체 생성
 
     // Repository를 생성자 주입
     public JiraService(JiraIssueRepository jiraIssueRepository, JiraProjectRepository jiraProjectRepository) {
@@ -64,34 +68,70 @@ public class JiraService {
     }
 
     //ieunji 추가
-    // Jira에서 최신 이슈 데이터를 반환 (DTO 형식)
-    public List<JiraIssueDTO> fetchAndReturnIssuesIds() {
-        fetchAndStoreJiraUpdates(); // 최신 데이터를 저장
-        return jiraIssueRepository.findAll().stream()
-                .map(this::convertToDTO) // 엔티티를 DTO로 변환
-                .toList();
+    public List<JiraProjectDTO> fetchProjectList() {
+        String url = jiraBaseUrl + "/project";
+        HttpHeaders headers = createAuthHeaders();
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            JSONArray projects = new JSONArray(response.getBody());
+            return projects.toList().stream()
+                    .map(obj -> {
+                        JSONObject project = new JSONObject((Map) obj);
+                        return new JiraProjectDTO(
+                                project.getString("id"),
+                                project.getString("key"),
+                                project.getString("name"),
+                                project.getString("projectTypeKey")
+                        );
+                    })
+                    .toList();
+        } else {
+            throw new RuntimeException("Failed to fetch Jira projects: " + response.getStatusCode());
+        }
     }
 
-    // 엔티티를 DTO로 변환하는 메서드
-    private JiraIssueDTO convertToDTO(JiraIssue issue) {
-        JiraIssueDTO dto = new JiraIssueDTO();
-        dto.setIssueId(issue.getIssueId());
-        dto.setSummary(issue.getSummary());
-        dto.setStatus(issue.getStatus());
-        dto.setAssignee(issue.getAssignee());
-        dto.setUpdatedAt(issue.getUpdatedAt());
-        dto.setProjectKey(issue.getProjectKey());
-        return dto;
-    }
-    public void saveProjectSelection(String userId, String selectedProjectId) {
-        // JiraProject 엔티티 생성 및 저장
-        JiraProject jiraProject = new JiraProject();
-        jiraProject.setUserId(userId);
-        jiraProject.setProjectId(selectedProjectId);
+    /**
+     * 선택된 프로젝트 저장
+     */
+    public void saveProjectSelection(String userId, String projectId) {
+        JiraProject project = new JiraProject(); // 엔티티 생성
+        project.setUserId(userId);
+        project.setProjectId(projectId);
 
-        jiraProjectRepository.save(jiraProject); // 데이터베이스에 저장
-        System.out.println("User " + userId + " selected Jira project: " + selectedProjectId);
+        jiraProjectRepository.save(project); // 데이터베이스에 저장
+        System.out.println("Saved project selection for user: " + userId + ", project: " + projectId);
     }
+
+//    // Jira에서 최신 이슈 데이터를 반환 (DTO 형식)
+//    public List<JiraIssueDTO> fetchAndReturnIssuesTitles() {
+//        fetchAndStoreJiraUpdates(); // 최신 데이터를 저장
+//        return jiraIssueRepository.findAll().stream()
+//                .map(this::convertToDTO) // 엔티티를 DTO로 변환
+//                .toList();
+//    }
+//
+//    // 엔티티를 DTO로 변환하는 메서드
+//    private JiraIssueDTO convertToDTO(JiraIssue issue) {
+//        JiraIssueDTO dto = new JiraIssueDTO();
+//        dto.setIssueId(issue.getIssueId());
+//        dto.setSummary(issue.getSummary());
+//        dto.setStatus(issue.getStatus());
+//        dto.setAssignee(issue.getAssignee());
+//        dto.setUpdatedAt(issue.getUpdatedAt());
+//        dto.setProjectKey(issue.getProjectKey());
+//        return dto;
+//    }
+//    public void saveIssueSelection(String userId, String selectedIssueId) {
+//        // JiraIssue 엔티티 생성 및 저장
+//        JiraIssue jiraIssue = new JiraIssue(); // 엔티티 클래스 이름에 맞게 수정
+//        jiraIssue.setUserId(userId);           // 사용자를 구분하기 위한 ID
+//        jiraIssue.setIssueId(selectedIssueId); // 선택한 이슈 ID
+//
+//        jiraIssueRepository.save(jiraIssue); // 데이터베이스에 저장
+//        System.out.println("User " + userId + " selected Jira issue: " + selectedIssueId);
+//    }
     //--여기까지
 
     // 인증 헤더 생성 메소드

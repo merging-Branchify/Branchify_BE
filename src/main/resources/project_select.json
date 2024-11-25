@@ -1,49 +1,27 @@
 {
-  "blocks": [
-    {
-      "type": "divider"
+  "blocks" : [ {
+    "type" : "divider"
+  }, {
+    "type" : "section",
+    "text" : {
+      "type" : "mrkdwn",
+      "text" : "\uD83D\uDD17연동할 Jira 프로젝트를 선택하세요."
     },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "🔗연동할 Jira 프로젝트를 선택하세요."
+    "accessory" : {
+      "type" : "static_select",
+      "placeholder" : {
+        "type" : "plain_text",
+        "text" : "Select an item",
+        "emoji" : true
       },
-      "accessory": {
-        "type": "static_select",
-        "placeholder": {
-          "type": "plain_text",
-          "text": "Select an item",
-          "emoji": true
+      "options" : [ {
+        "text" : {
+          "type" : "plain_text",
+          "text" : "Merging"
         },
-        "options": [
-          {
-            "text": {
-              "type": "plain_text",
-              "text": "*plain_text option 0*",
-              "emoji": true
-            },
-            "value": "value-0"
-          },
-          {
-            "text": {
-              "type": "plain_text",
-              "text": "*plain_text option 1*",
-              "emoji": true
-            },
-            "value": "value-1"
-          },
-          {
-            "text": {
-              "type": "plain_text",
-              "text": "*plain_text option 2*",
-              "emoji": true
-            },
-            "value": "value-2"
-          }
-        ],
-        "action_id": "static_select-action"
-      }
+        "value" : "10000"
+      } ],
+      "action_id" : "project_select-action"
     }
-  ]
+  } ]
 }

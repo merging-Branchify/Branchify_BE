@@ -15,10 +15,9 @@ public class JiraIssue {
 
     @Column(unique = true)
     private String issueId;
-    private Long userId;
-    private String projectId;
+    private String userId;
 
-    private String summary;
+    private String summary; //이슈 제목임
     private String status;
     private String assignee;
     private LocalDateTime updatedAt;

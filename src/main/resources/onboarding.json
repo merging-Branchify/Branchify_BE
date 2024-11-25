@@ -1,0 +1,92 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "🚀 Branchify 사용 가이드",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*안녕하세요! 저는* *'파이'* *예요!.* 🖐️\n\nBranchify는 Slack과 SaaS를 통합하여 팀의 소통과 협업을 혁신하는 도구에요. 여러분의 프로젝트에서 생산성과 효율성을 극대화하는 새로운 차원의 경험을 제공하고자 해요. 🤗"
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "✨ *Branchify 주요 기능*"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "1️⃣ *Jira와 Notion과 연동*\n\n`/jira_fy` 및 `/notion_fy` 명령어를 사용해 파이와 연동할 수 있어요! \n\n✔️ *Jira*: 프로젝트 변경사항에 대한 모든 정보를 Slack에서 바로 확인해요.\n✔️ *Notion*: 데이터베이스의 변경사항을 Slack에서 한눈에 파악해요."
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "2️⃣ *AI 기반 일정기간 변경사항 요약*\n\n파이는 Jira와 Notion 등의 협업 툴에서 발생하는 모든 중요한 변경사항을 AI를 통해 분석하고 요약하여 매일, 매주 정해진 시간에 Slack으로 전달합니다. \n\n _*예시*: \"[BE] [기능 명세서 & 구현 기능 정리]\"_"
+      }
+    },
+    {
+      "type": "image",
+      "image_url": "https://branchify-fe.vercel.app/assets/feature-1-Cxv6CcS4.png",
+      "alt_text": "Branchify 기능 스크린샷"
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "3️⃣ *이모지 반응으로 Jira 티켓 생성🎫*\n\n팀원의 Slack 메시지에 이모지로 반응하면, Jira에서 바로 이슈 티켓을 생성해요. 이제 번거로운 단계를 줄이고 빠르게 작업을 시작할 수 있어요!"
+      }
+    },
+    {
+      "type": "image",
+      "image_url": "https://branchify-fe.vercel.app/assets/feature-2-nLOST_km.png",
+      "alt_text": "Branchify 기능 스크린샷"
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "🔔 *알림받을 채널 선택*\nJira 혹은 Notion과 연결 후, 파이가 작동할 Slack 채널을 선택해주세요. 채널 설정을 완료하면 파이 봇이 실시간으로 알림을 전달해줘요."
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "💡 *Branchify로 팀의 잠재력을 극대화하세요.*\n\nSlack 안에서 모든 도구와 작업이 하나로 통합되는 경험, 지금 바로 경험하세요. <https://https://branchify-fe.vercel.app/| 🔗랜딩페이지 바로 가기>"
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": "👀 언제든지 `/help` 명령어로 도움을 받을 수 있어요.\n❓ 더 궁금한 점이 있다면 `/faq`를 입력해보세요."
+        }
+      ]
+    }
+  ]
+}

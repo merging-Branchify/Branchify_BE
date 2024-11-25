@@ -3,6 +3,7 @@ package com.merging.branchify.config;
 import com.merging.branchify.controller.SlackEventController;
 import com.slack.api.SlackConfig;
 import com.slack.api.bolt.App;
+import com.slack.api.model.event.AppHomeOpenedEvent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Import;
@@ -35,13 +36,17 @@ public class SlackAppRunner implements CommandLineRunner {
         // Slack Bolt App 설정 및 실행
         App app = new App();
         slackEventController.configureSlackCommands(app); // 명령어 및 핸들러 등록
+        //app_home_opened 이벤트 처리
+        app.event(AppHomeOpenedEvent.class, (req, ctx) -> {
+            slackEventController.handleAppHomeOpenedEvent(req.getEvent(), ctx);
+            return ctx.ack();
+        });
         //WebSocket URL 가져오기
         String webSocketUrl = getWebSocketUrl();
 
         // WebSocket 연결 시작
         startWebSocketConnection(webSocketUrl, app);
-//        SocketModeApp socketModeApp = new SocketModeApp(appToken, app);
-//        socketModeApp.start(); // Slack 앱 실행
+
     }
     /**
      * Slack API 호출을 통해 WebSocket URL 가져오기
