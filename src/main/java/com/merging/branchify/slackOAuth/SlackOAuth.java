@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Entity
 @Data
-public class SlackUser {
+public class SlackOAuth {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

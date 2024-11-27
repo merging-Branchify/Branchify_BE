@@ -47,7 +47,7 @@ public class SlackOAuthController {
             }
 
             // 사용자 정보 저장
-            SlackUserDTO slackUserDTO = slackOAuthService.registerOrUpdateSlackUser(response);
+            SlackOAuthDTO slackUserDTO = slackOAuthService.registerOrUpdateSlackUser(response);
 
             // 사용자의 워크스페이스로 리다이렉트
             String redirectUrl = "slack://open?team=" + slackUserDTO.getWorkspaceId();

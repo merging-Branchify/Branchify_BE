@@ -37,10 +37,10 @@ public class SlackOAuthService {
     }
 
     // Slack 사용자 등록 또는 업데이트
-    public SlackUserDTO registerOrUpdateSlackUser(OAuthV2AccessResponse response) {
-        SlackUser slackUser = slackUserRepository.findByWorkspaceId(response.getTeam().getId());
+    public SlackOAuthDTO registerOrUpdateSlackUser(OAuthV2AccessResponse response) {
+        SlackOAuth slackUser = slackUserRepository.findByWorkspaceId(response.getTeam().getId());
         if (slackUser == null) {
-            slackUser = new SlackUser();
+            slackUser = new SlackOAuth();
             slackUser.setWorkspaceId(response.getTeam().getId());
             slackUser.setWorkspaceName(response.getTeam().getName());
         }
@@ -49,7 +49,7 @@ public class SlackOAuthService {
         slackUserRepository.save(slackUser);
 
         // SlackUser 엔티티를 DTO로 변환하여 반환
-        SlackUserDTO dto = new SlackUserDTO();
+        SlackOAuthDTO dto = new SlackOAuthDTO();
         dto.setWorkspaceId(slackUser.getWorkspaceId());
         dto.setWorkspaceName(slackUser.getWorkspaceName());
         dto.setAccessToken(slackUser.getAccessToken());
