@@ -16,17 +16,15 @@ import java.io.IOException;
 @Service
 public class SlackOAuthService {
 
-    private final SlackUserRepository slackUserRepository;
     @Value("${slack.client.secret}")
     private String clientSecret;
 
     @Value("${slack.redirect.uri}")
     private String redirectUrl;
 
-    private final SlackUserRepository userRepository;
+    private final SlackUserRepository slackUserRepository;
 
-    public SlackOAuthService(SlackUserRepository userRepository, SlackUserRepository slackUserRepository) {
-        this.userRepository = userRepository;
+    public SlackOAuthService(SlackUserRepository slackUserRepository) {
         this.slackUserRepository = slackUserRepository;
     }
 
@@ -43,10 +41,11 @@ public class SlackOAuthService {
 
     // Slack 사용자 등록 또는 업데이트
     public SlackUserDTO registerOrUpdateSlackUser(OAuthV2AccessResponse response) {
-        SlackUser slackUser = userRepository.findByWorkspaceId(response.getTeam().getId());
+        SlackUser slackUser = slackUserRepository.findByWorkspaceId(response.getTeam().getId());
         if (slackUser == null) {
             slackUser = new SlackUser();
             slackUser.setWorkspaceId(response.getTeam().getId());
+            slackUser.setWorkspaceName(response.getTeam().getName());
         }
 
         slackUser.setAccessToken(response.getAccessToken());
@@ -55,6 +54,7 @@ public class SlackOAuthService {
         // SlackUser 엔티티를 DTO로 변환하여 반환
         SlackUserDTO dto = new SlackUserDTO();
         dto.setWorkspaceId(slackUser.getWorkspaceId());
+        dto.setWorkspaceName(slackUser.getWorkspaceName());
         dto.setAccessToken(slackUser.getAccessToken());
         return dto;
     }

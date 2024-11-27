@@ -11,9 +11,13 @@ public class SlackUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String workspaceId;
+    @Column(name = "slack_workspace_id",nullable = false, unique = true)
+    private String workspaceId; // Slack 워크스페이스 ID
 
+    @Column(name = "slack_workspace_name")
+    private String workspaceName; // Slack 워크스페이스 이름
+
+    @Column(name = "slack_access_token")
     private String accessToken;
 
 }
