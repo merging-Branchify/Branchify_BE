@@ -2,7 +2,7 @@ package com.merging.branchify.slackOAuth;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface SlackUserRepository extends JpaRepository<SlackUser, Long> {
+public interface SlackUserRepository extends JpaRepository<SlackOAuth, Long> {
 
-    SlackUser findByWorkspaceId(String workspaceId);
+    SlackOAuth findByWorkspaceId(String workspaceId);
 }
