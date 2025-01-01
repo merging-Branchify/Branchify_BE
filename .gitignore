@@ -1,6 +1,5 @@
 HELP.md
 .gradle
-.DS_Store
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
@@ -41,3 +40,6 @@ out/
 ### yml file secret info ###
 src/main/resources/application.yml
 build/resources/main/application.yml
+
+### Mac ###
+.DS_Store

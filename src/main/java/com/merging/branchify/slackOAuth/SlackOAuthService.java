@@ -19,9 +19,9 @@ public class SlackOAuthService {
     @Value("${slack.redirect.uri}")
     private String redirectUrl;
 
-    private final SlackUserRepository slackUserRepository;
+    private final SlackOAuthRepository slackUserRepository;
 
-    public SlackOAuthService(SlackUserRepository slackUserRepository) {
+    public SlackOAuthService(SlackOAuthRepository slackUserRepository) {
         this.slackUserRepository = slackUserRepository;
     }
 
